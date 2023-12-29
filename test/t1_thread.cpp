@@ -9,30 +9,19 @@
 
 #include "global_test_set.h"
 
-void foo() {
-  std::cout << RED_COLOR << "mock failed\n" << RESET_COLOR;
-  // 模拟耗费大量资源的操作
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-}
-
-void bar() {
-  std::cout << RED_COLOR << "mock failed\n" << RESET_COLOR;
-  // 模拟耗费大量资源的操作
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-}
-
 TEST(t1_thread, join) {
   // start mock
   mock_thread m_thread;
 
+  // The following code is derived from: https://en.cppreference.com/w/cpp/thread/thread/join
   auto foo = []() {
     std::cout << RED_COLOR << "mock failed\n" << RESET_COLOR;
-    // 模拟耗费大量资源的操作
+    // simulate expensive operation
     std::this_thread::sleep_for(std::chrono::seconds(1));
   };
   auto bar = []() {
     std::cout << RED_COLOR << "mock failed\n" << RESET_COLOR;
-    // 模拟耗费大量资源的操作
+    // simulate expensive operation
     std::this_thread::sleep_for(std::chrono::seconds(1));
   };
 
@@ -45,7 +34,6 @@ TEST(t1_thread, join) {
   std::cout << "waiting for helpers to finish..." << std::endl;
   helper1.join();
   helper2.join();
-  std::cout << "after join\n";
 
   std::cout << "done!\n";
 }
