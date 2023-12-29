@@ -1,14 +1,13 @@
 //
 // Created by shecannotsee on 23-12-29.
 //
+
+#include "global_test_set.h"
 #include <mock_thread.h>
 
 #include <chrono>
 #include <iostream>
 #include <thread>
-
-#include "class_support.h"
-#include "global_test_set.h"
 
 TEST(t1_thread, join) {
   // start mock
