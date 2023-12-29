@@ -4,6 +4,7 @@
 ########################################################################################################################
 
 # include
+include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/googletest/include)
 
 # lib
