@@ -44,14 +44,13 @@ TEST(t1_thread, join1) {
   // start mock
   mock_thread<std::thread, mock::thread> m_thread;
 
-  // The following code is derived from: https://zh.cppreference.com/w/cpp/thread/thread/detach
   auto independentThread = []() {
-    std::cout << RED_COLOR << "mock failed\n" << RESET_COLOR;
+    std::cout << RED_COLOR << "mock failed.\n" << RESET_COLOR;
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    std::cout << RED_COLOR << "mock failed\n" << RESET_COLOR;
+    std::cout << RED_COLOR << "mock failed.\n" << RESET_COLOR;
   };
-  std::cout << "Starting thread caller.\n";
+  std::cout << GREEN_COLOR << "step1, next run detach.\n" << RESET_COLOR;
   std::thread t(independentThread);
   t.detach();
-  std::cout << "Exiting thread caller.\n";
+  std::cout << GREEN_COLOR << "step2.\n" << RESET_COLOR;
 }
