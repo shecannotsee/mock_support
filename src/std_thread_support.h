@@ -7,9 +7,9 @@
 
 #include <thread>
 
-constexpr bool start_mock_print_thread = true;
-
 namespace mock {
+
+constexpr bool start_mock_print_thread = true;
 
 class thread {
  private:
