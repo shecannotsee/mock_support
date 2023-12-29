@@ -4,6 +4,10 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <cpp-stub/stub.h>
+#include <cpp-stub/addr_pri.h>
+#include <cpp-stub/addr_any.h>
+#include "std_thread_support.h"
 
 const std::string RESET_COLOR   = "[0m";
 const std::string RED_COLOR     = "[31m";
