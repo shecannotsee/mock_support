@@ -6,6 +6,10 @@
 #define STD_THREAD_SUPPORT_H
 #include <thread>
 
+namespace {
+constexpr bool start_mock_print = true;
+}
+
 namespace mock {
 
 class thread {
@@ -23,33 +27,51 @@ class thread {
 
  public:
   thread() {
-    printf("thread_mock_c success!(default)\n");
+    if (start_mock_print) {
+      printf("mock std::thread::thread() success!\n");
+    }
   }
 
   template <typename Callable, typename... Args, typename = std::_Require<not_same<Callable>>>
   explicit thread(Callable &&f, Args &&...args) {
-    printf("thread_mock_c success!(function)\n");
+    if (start_mock_print) {
+      printf("mock std::thread::thread(...) success!\n");
+    }
   }
 
   ~thread() {
-    printf("thread_mock_d success!\n");
+    if (start_mock_print) {
+      printf("std::thread::~thread() success!\n");
+    }
   }
 
   static void join() {
+    if (start_mock_print) {
+      printf("mock std::thread::join success!\n");
+    }
   }
 
   static void detach() {
+    if (start_mock_print) {
+      printf("mock std::thread::detach success!\n");
+    }
   }
 
-  static int pthread_create_mock(pthread_t *__restrict __newthread,
-                                 const pthread_attr_t *__restrict __attr,
-                                 void *(*__start_routine)(void *),
-                                 void *__restrict __arg) {
+  static int pthread_create(pthread_t *__restrict __newthread,
+                            const pthread_attr_t *__restrict __attr,
+                            void *(*__start_routine)(void *),
+                            void *__restrict __arg) {
+    if (start_mock_print) {
+      printf("mock std::thread::thread(...)::pthread_create success!\n");
+    }
     static int ret = 1;
     return ret;
   }
 
   static void _M_start_thread_mock(std::unique_ptr<std::thread::_State>, void (*)()) {
+    if (start_mock_print) {
+      printf("mock std::thread::thread(...)::_M_start_thread_mock success!\n");
+    }
   }
 
 };  // class thread_mock
