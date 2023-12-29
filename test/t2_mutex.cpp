@@ -8,12 +8,14 @@
 #include <thread>
 
 #include "global_test_set.h"
+#include "mock_mutex.h"
 
 TEST(t2_mutex, mutex) {
+  mock_mutex<std::mutex, mock::mutex> m_mutex;
 
   // code from: https://zh.cppreference.com/w/cpp/thread/mutex
   static std::map<std::string, std::string> g_pages;
-  static std::mutex g_pages_mutex;
+  std::mutex g_pages_mutex;
 
   auto save_page = [&](const std::string &url) {
     // 模拟长页面读取
