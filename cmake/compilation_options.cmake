@@ -12,4 +12,4 @@ set(CMAKE_CXX_FLAGS "-g")
 # target type
 set(CMAKE_BUILD_TYPE ${compilation_options})
 
-
+SET(CMAKE_CXX_FLAGS "-fno-access-control")
