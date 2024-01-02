@@ -10,18 +10,14 @@
 #include "std_mutex_support.h"
 
 // The usage is as follows:
-//   mock_mutex<std::mutex, mock::mutex> m_mutex;
-template <typename T1, typename T2>
+//   mock_mutex mock_mutex_turn_on;
 class mock_mutex {
  public:
   mock_mutex() {
-    // ctor
-    // dtor
-    auto std_mutex_d  = mock::get_dtor_addr<T1>();
-    auto mock_mutex_d = mock::get_dtor_addr<T2>();
-    stub_.set(std_mutex_d, mock_mutex_d);
     // lock
     stub_.set(ADDR(std::mutex, lock), mock::mutex::lock);
+    // unlock
+    stub_.set(ADDR(std::mutex, unlock), mock::mutex::unlock);
     // try_lock
     stub_.set(ADDR(std::mutex, try_lock), mock::mutex::try_lock);
     // native_handle
@@ -34,30 +30,92 @@ class mock_mutex {
   Stub stub_;
 };
 
+class mock_timed_mutex {
+ public:
+  mock_timed_mutex() {
+    // lock
+    stub_.set(ADDR(std::mutex, lock), mock::mutex::lock);
+    // unlock
+    stub_.set(ADDR(std::mutex, unlock), mock::mutex::unlock);
+    // try_lock
+    stub_.set(ADDR(std::mutex, try_lock), mock::mutex::try_lock);
+    // native_handle
+    stub_.set(ADDR(std::mutex, native_handle), mock::mutex::native_handle);
+  }
+
+  ~mock_timed_mutex() = default;
+
+ private:
+  Stub stub_;
+};
+
 // The usage is as follows:
-//   mock_condition_variable<std::condition_variable, mock::condition_variable> m_condition_variable;
+//   lock_guard mock_lock_guard_turn_on;
+class mock_lock_guard {
+ public:
+  mock_lock_guard() {
+    // mock mutex is complete
+    // lock
+    stub_.set(ADDR(std::mutex, lock), mock::mutex::lock);
+    // unlock
+    stub_.set(ADDR(std::mutex, unlock), mock::mutex::unlock);
+    // try_lock
+    stub_.set(ADDR(std::mutex, try_lock), mock::mutex::try_lock);
+    // native_handle
+    stub_.set(ADDR(std::mutex, native_handle), mock::mutex::native_handle);
+  }
+
+  ~mock_lock_guard() = default;
+
+ private:
+  Stub stub_;
+};
+
+// The usage is as follows:
+//    mock_unique_lock mock_unique_lock_turn_on;
+template <typename std_mutex_type, typename mock_mutex_type>
+class mock_unique_lock {
+ public:
+  mock_unique_lock() {
+    // mock mutex
+    // lock
+    stub_.set(ADDR(std::mutex, lock), mock::mutex::lock);
+    // unlock
+    stub_.set(ADDR(std::mutex, unlock), mock::mutex::unlock);
+    // try_lock
+    stub_.set(ADDR(std::mutex, try_lock), mock::mutex::try_lock);
+    // native_handle
+    stub_.set(ADDR(std::mutex, native_handle), mock::mutex::native_handle);
+
+    // unique_lock
+    // lock
+    stub_.set(ADDR(std::unique_lock<std::mutex>, lock), mock::unique_lock<std::mutex>::lock);
+    // try_lock
+    stub_.set(ADDR(std::unique_lock<std::mutex>, try_lock), mock::unique_lock<std::mutex>::try_lock);
+    // try_lock_until: Not supported, because std::mutex doesn't have a member function try_lock_until
+    // try_lock_for: Not supported, because std::mutex doesn't have a member function try_lock_for
+    // unlock
+    stub_.set(ADDR(std::unique_lock<std::mutex>, unlock), mock::unique_lock<std::mutex>::unlock);
+    // swap
+    stub_.set(ADDR(std::unique_lock<std::mutex>, swap), mock::unique_lock<std::mutex>::swap);
+    // release
+    stub_.set(ADDR(std::unique_lock<std::mutex>, release), mock::unique_lock<std::mutex>::release);
+    // owns_lock
+    stub_.set(ADDR(std::unique_lock<std::mutex>, owns_lock), mock::unique_lock<std::mutex>::owns_lock);
+    // mutex
+    stub_.set(ADDR(std::unique_lock<std::mutex>, mutex), mock::unique_lock<std::mutex>::mutex);
+  }
+
+  ~mock_unique_lock() = default;
+
+ private:
+  Stub stub_;
+};
+
 template <typename T1, typename T2>
 class mock_condition_variable {
  public:
   mock_condition_variable() {
-    // ctor
-    auto std_cv_ctor  = mock::get_ctor_addr<T1>();
-    auto mock_cv_ctor = mock::get_ctor_addr<T2>();
-    stub_.set(std_cv_ctor, mock_cv_ctor);
-    // dtor
-    auto std_cv_d  = mock::get_dtor_addr<T1>();
-    auto mock_cv_d = mock::get_dtor_addr<T2>();
-    stub_.set(std_cv_d, mock_cv_d);
-    // notify_one
-    stub_.set(ADDR(std::condition_variable, notify_one), mock::condition_variable::notify_one);
-    // notify_all
-    stub_.set(ADDR(std::condition_variable, notify_all), mock::condition_variable::notify_all);
-    // wait
-    stub_.set((void(std::condition_variable::*)(mock::condition_variable))ADDR(std::condition_variable, wait),
-              mock::condition_variable::wait);
-
-    // native_handle
-    stub_.set(ADDR(std::condition_variable, native_handle), mock::condition_variable::native_handle);
   }
 
   ~mock_condition_variable() = default;
