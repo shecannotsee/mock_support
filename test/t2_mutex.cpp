@@ -177,9 +177,7 @@ TEST(t2_mutex, condition_variable) {
     {
       std::cout << PURPLE_COLOR << "wait_for\n" << RESET_COLOR;
       // t2
-      {
-        cv.wait_for(test_u_l, std::chrono::milliseconds(200));
-      }
+      { cv.wait_for(test_u_l, std::chrono::milliseconds(200)); }
       // t3
       {
         const std::function<bool()> function = [] {
