@@ -59,57 +59,58 @@ TEST(t2_mutex, lock_guard) {
 }
 
 TEST(t2_mutex, unique_lock_with_mutex) {
-  mock_unique_lock_with_mutex mock_unique_lock_with_mutex_turn_on;
+  mock_unique_lock<std::mutex, mock::mutex> mock_unique_lock_turn_on;
+  // mock_unique_lock_with_mutex mock_unique_lock_with_mutex_turn_on;
   {
-    std::mutex test_target;
-    std::unique_lock<std::mutex> ul(test_target);
+    std::mutex test_mutex;
+    std::unique_lock<std::mutex> test_target(test_mutex);
     std::cout << BLUE_COLOR << "Member functions start!\n" << RESET_COLOR;
-    ul.lock();
-    ul.try_lock();
-    ul.unlock();
+    test_target.lock();
+    test_target.try_lock();
+    test_target.unlock();
     std::cout << PURPLE_COLOR << "Swap start!\n" << RESET_COLOR;
     {
-      std::unique_lock<std::mutex> swap_target(test_target);
-      ul.swap(swap_target);
+      std::unique_lock<std::mutex> swap_target(test_mutex);
+      test_target.swap(swap_target);
     }
     std::cout << PURPLE_COLOR << "Swap done.\n" << RESET_COLOR;
-    ul.release();
-    ul.owns_lock();
-    ul.mutex();
+    test_target.release();
+    test_target.owns_lock();
+    test_target.mutex();
     std::cout << BLUE_COLOR << "Member functions done.\n" << RESET_COLOR;
   }
   SUCCEED();
 }
 
 TEST(t2_mutex, unique_lock_with_timed_mutex) {
-  mock_unique_lock_with_timed_mutex mock_unique_lock_with_timed_mutex_turn_on;
+  mock_unique_lock<std::timed_mutex, mock::timed_mutex> mock_unique_lock_turn_on;
   {
-    std::timed_mutex test_target;
-    std::unique_lock<std::timed_mutex> ul(test_target);
+    std::timed_mutex test_mutex;
+    std::unique_lock<std::timed_mutex> test_target(test_mutex);
     std::cout << BLUE_COLOR << "Member functions start!\n" << RESET_COLOR;
-    ul.lock();
-    ul.try_lock();
+    test_target.lock();
+    test_target.try_lock();
     // try_lock_for
     {
       const auto timeout = std::chrono::milliseconds(200);
-      ul.try_lock_for(timeout);
+      test_target.try_lock_for(timeout);
     }
     // try_lock_until
     {
       const auto now     = std::chrono::system_clock::now();
       const auto timeout = now + std::chrono::seconds(10);
-      ul.try_lock_until(timeout);
+      test_target.try_lock_until(timeout);
     }
-    ul.unlock();
+    test_target.unlock();
     std::cout << PURPLE_COLOR << "Swap start!\n" << RESET_COLOR;
     {
-      std::unique_lock<std::timed_mutex> swap_target(test_target);
-      ul.swap(swap_target);
+      std::unique_lock<std::timed_mutex> swap_target(test_mutex);
+      test_target.swap(swap_target);
     }
     std::cout << PURPLE_COLOR << "Swap done.\n" << RESET_COLOR;
-    ul.release();
-    ul.owns_lock();
-    ul.mutex();
+    test_target.release();
+    test_target.owns_lock();
+    test_target.mutex();
     std::cout << BLUE_COLOR << "Member functions done.\n" << RESET_COLOR;
   }
   SUCCEED();
