@@ -9,76 +9,52 @@
 
 #include "global_test_set.h"
 #include "mock_mutex.h"
+#include "mock_thread.h"
 
 TEST(t2_mutex, mutex) {
-  mock_mutex<std::mutex, mock::mutex> m_mutex;
+  mock_mutex mock_mutex_turn_on;
 
-  // code from: https://zh.cppreference.com/w/cpp/thread/mutex
-  static std::map<std::string, std::string> g_pages;
-  std::mutex g_pages_mutex;
+  std::mutex test_target;
+  test_target.lock();
+  test_target.unlock();
+  test_target.try_lock();
+  test_target.native_handle();
+  SUCCEED();
+}
 
-  auto save_page = [&](const std::string &url) {
-    // 模拟长页面读取
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    std::string result = "fake content";
+TEST(t2_mutex, lock_guard) {
+  mock_lock_guard mock_lock_guard_turn_on;
 
-    std::lock_guard<std::mutex> guard(g_pages_mutex);
-    g_pages[url] = result;
-  };
-
-  std::thread t1(save_page, "http://foo");
-  std::thread t2(save_page, "http://bar");
-  t1.join();
-  t2.join();
-
-  // 现在访问g_pages是安全的，因为线程t1/t2生命周期已结束
-  for (const auto &pair : g_pages) {
-    std::cout << pair.first << " => " << pair.second << '\n';
+  {
+    std::mutex test_target;
+    std::lock_guard<std::mutex> lg(test_target);
   }
+  SUCCEED();
+}
+
+TEST(t2_mutex, unique_lock) {
+  mock_unique_lock<std::mutex, mock::mutex> mock_unique_lock_turn_on;
+  {
+    std::mutex test_target;
+    std::unique_lock<std::mutex> ul(test_target);
+    std::cout << BLUE_COLOR << "Member functions start!\n" << RESET_COLOR;
+    ul.lock();
+    ul.try_lock();
+    ul.unlock();
+    std::cout << PURPLE_COLOR << "Swap start!\n" << RESET_COLOR;
+    {
+      std::unique_lock<std::mutex> swap_target(test_target);
+      ul.swap(swap_target);
+    }
+    std::cout << PURPLE_COLOR << "Swap done.\n" << RESET_COLOR;
+    ul.release();
+    ul.owns_lock();
+    ul.mutex();
+    std::cout << BLUE_COLOR << "Member functions done.\n" << RESET_COLOR;
+  }
+  SUCCEED();
 }
 
 TEST(t2_mutex, condition_variable) {
-  // code from: https://zh.cppreference.com/w/cpp/thread/condition_variable
-  static std::mutex m;
-  static std::condition_variable cv;
-  static std::string data;
-  static bool ready     = false;
-  static bool processed = false;
-
-  auto worker_thread = [&]() {
-    // 等待直至 main() 发送数据
-    std::unique_lock<std::mutex> lk(m);
-    cv.wait(lk, [] { return ready; });
-
-    // 等待后，我们占有锁。
-    std::cout << "Worker thread is processing data\n";
-    data += " after processing";
-
-    // 发送数据回 main()
-    processed = true;
-    std::cout << "Worker thread signals data processing completed\n";
-    // 通知前完成手动解锁，以避免等待线程才被唤醒就阻塞（细节见 notify_one ）
-    lk.unlock();
-    cv.notify_one();
-  };
-
-  std::thread worker(worker_thread);
-
-  data = "Example data";
-  // 发送数据到 worker 线程
-  {
-    std::lock_guard<std::mutex> lk(m);
-    ready = true;
-    std::cout << "main() signals data ready for processing\n";
-  }
-  cv.notify_one();
-
-  // 等候 worker
-  {
-    std::unique_lock<std::mutex> lk(m);
-    cv.wait(lk, []{return processed;});
-  }
-  std::cout << "Back in main(), data = " << data << '\n';
-
-  worker.join();
+  return;
 }
