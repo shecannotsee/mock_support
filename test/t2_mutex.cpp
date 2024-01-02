@@ -138,12 +138,13 @@ TEST(t2_mutex, condition_variable) {
       };
       cv.wait(test_u_l, function);
     }
-    // wati_until
+    // wait_until
     {
+      std::cout << PURPLE_COLOR << "wait_until\n" << RESET_COLOR;
       // t1
       {
         auto timeout = std::chrono::system_clock::now() + std::chrono::milliseconds(200);
-        auto ret =cv.wait_until(test_u_l, timeout);
+        auto ret     = cv.wait_until(test_u_l, timeout);
         EXPECT_EQ(ret, std::cv_status::timeout);
       }
       // t2
@@ -170,6 +171,23 @@ TEST(t2_mutex, condition_variable) {
         };
         auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(5);
         cv.wait_until(test_u_l, timeout, check_function);
+      }
+    }
+    // wait_for
+    {
+      std::cout << PURPLE_COLOR << "wait_for\n" << RESET_COLOR;
+      // t2
+      {
+        cv.wait_for(test_u_l, std::chrono::milliseconds(200));
+      }
+      // t3
+      {
+        const std::function<bool()> function = [] {
+          std::cout << RED_COLOR << "Mock failed\n" << RESET_COLOR;
+          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+          return false;
+        };
+        cv.wait_for(test_u_l, std::chrono::milliseconds(200), function);
       }
     }
     cv.native_handle();

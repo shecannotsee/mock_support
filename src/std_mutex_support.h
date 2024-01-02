@@ -436,11 +436,26 @@ class condition_variable {
     return std::cv_status::timeout;
     return std::cv_status::no_timeout;
   }
+  static std::cv_status wait_for_t2(std::unique_lock<std::mutex>&, const std::chrono::duration<int64_t, std::milli>&) {
+    if (start_mock_print_mutex) {
+      printf("mock std::condition_variable::wait_for(...1) success!\n");
+    }
+    return std::cv_status::timeout;
+    return std::cv_status::no_timeout;
+  }
 
   template <typename Rep, typename Period, typename Predicate>
   static bool wait_for(std::unique_lock<std::mutex>& lock,
                        const std::chrono::duration<Rep, Period>& rtime,
                        Predicate p) {
+    if (start_mock_print_mutex) {
+      printf("mock std::condition_variable::wait_for(...2) success!\n");
+    }
+    return true;
+  }
+  static bool wait_for_t3(std::unique_lock<std::mutex>&,
+                          const std::chrono::duration<int64_t, std::milli>&,
+                          std::function<bool()>) {
     if (start_mock_print_mutex) {
       printf("mock std::condition_variable::wait_for(...2) success!\n");
     }
