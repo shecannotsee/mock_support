@@ -126,7 +126,42 @@ TEST(t2_mutex, condition_variable) {
     std::cout << BLUE_COLOR << "Member functions start!\n" << RESET_COLOR;
     cv.notify_one();
     cv.notify_all();
-    cv.wait(test_u_l);
+    // wait
+    {
+      // p1
+      cv.wait(test_u_l);
+      // p2
+      const std::function<bool()> function = [] {
+        std::cout << RED_COLOR << "Mock failed\n" << RESET_COLOR;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        return false;
+      };
+      cv.wait(test_u_l, function);
+    }
+    // wati_until
+    {
+      // t1
+      {
+        auto timeout = std::chrono::system_clock::now() + std::chrono::milliseconds(200);
+        auto ret =cv.wait_until(test_u_l, timeout);
+        EXPECT_EQ(ret, std::cv_status::timeout);
+      }
+      // t2
+      {
+        auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+        cv.wait_until(test_u_l, timeout);
+      }
+      // t3
+      {
+        std::function<bool()> check_function = []() {
+          std::cout << RED_COLOR << "Mock failed\n" << RESET_COLOR;
+          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+          return false;
+        };
+        auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+        cv.wait_until(test_u_l, timeout, check_function);
+      }
+    }
     cv.native_handle();
     std::cout << BLUE_COLOR << "Member functions done.\n" << RESET_COLOR;
   }

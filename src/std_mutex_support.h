@@ -360,8 +360,17 @@ class condition_variable {
   }
 
   template <typename Duration>
-  static std::cv_status wait_until(std::unique_lock<std::mutex>& lock,
-                                   const std::chrono::time_point<__clock_t, Duration>& atime) {
+  static std::cv_status wait_until(std::unique_lock<std::mutex>&, const std::chrono::time_point<__clock_t, Duration>&) {
+    if (start_mock_print_mutex) {
+      printf("mock std::condition_variable::wait_until(...1) success!\n");
+    }
+    return std::cv_status::timeout;
+    return std::cv_status::no_timeout;
+  }
+  static std::cv_status wait_until_t1(void* obj,
+                                      std::unique_lock<std::mutex>&,
+                                      const std::chrono::time_point<std::chrono::system_clock>&) {
+    ::mock::condition_variable* o = (::mock::condition_variable*)obj;
     if (start_mock_print_mutex) {
       printf("mock std::condition_variable::wait_until(...1) success!\n");
     }
@@ -378,11 +387,32 @@ class condition_variable {
     return std::cv_status::timeout;
     return std::cv_status::no_timeout;
   }
+  static std::cv_status wait_until_t2(
+      void* obj,
+      std::unique_lock<std::mutex>&,
+      const std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds>&) {
+    ::mock::condition_variable* o = (::mock::condition_variable*)obj;
+    if (start_mock_print_mutex) {
+      printf("mock std::condition_variable::wait_until(...2) success!\n");
+    }
+    return std::cv_status::timeout;
+    return std::cv_status::no_timeout;
+  }
 
   template <typename Clock, typename Duration, typename Predicate>
   static bool wait_until(std::unique_lock<std::mutex>& lock,
                          const std::chrono::time_point<Clock, Duration>& atime,
                          Predicate p) {
+    if (start_mock_print_mutex) {
+      printf("mock std::condition_variable::wait_until(...3) success!\n");
+    }
+    return true;
+  }
+  static bool wait_until_t3(void* obj,
+                            std::unique_lock<std::mutex>&,
+                            const std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds>&,
+                            std::function<bool()>) {
+    ::mock::condition_variable* o = (::mock::condition_variable*)obj;
     if (start_mock_print_mutex) {
       printf("mock std::condition_variable::wait_until(...3) success!\n");
     }

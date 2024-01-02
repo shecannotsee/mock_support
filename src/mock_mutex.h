@@ -198,6 +198,21 @@ class mock_condition_variable {
                   std::condition_variable, wait),
               mock::condition_variable::wait_mutex_f);
     // wait_until
+    stub_.set((std::cv_status(std::condition_variable::*)(
+                  std::unique_lock<std::mutex>&,
+                  const std::chrono::time_point<std::chrono::system_clock>&))ADDR(std::condition_variable, wait_until),
+              mock::condition_variable::wait_until_t1);
+    stub_.set(
+        (std::cv_status(std::condition_variable::*)(
+            std::unique_lock<std::mutex>&,
+            const std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds>&))
+            ADDR(std::condition_variable, wait_until),
+        mock::condition_variable::wait_until_t2);
+    stub_.set((bool(std::condition_variable::*)(
+                  std::unique_lock<std::mutex>&,
+                  const std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds>&,
+                  std::function<bool()>))ADDR(std::condition_variable, wait_until),
+              mock::condition_variable::wait_until_t3);
     // wait_for
     // native_handle
     stub_.set(ADDR(std::condition_variable, native_handle), mock::condition_variable::native_handle);
