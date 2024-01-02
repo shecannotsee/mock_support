@@ -194,7 +194,7 @@ class mock_condition_variable {
     stub_.set((void(std::condition_variable::*)(std::unique_lock<std::mutex>&))ADDR(std::condition_variable, wait),
               mock::condition_variable::wait);
 
-    stub_.set((void(std::condition_variable::*)(std::unique_lock<std::mutex>&, LambdaType))ADDR(
+    stub_.set((void(std::condition_variable::*)(std::unique_lock<std::mutex>&, std::function<bool()>))ADDR(
                   std::condition_variable, wait),
               mock::condition_variable::wait_mutex_f);
     // wait_until
