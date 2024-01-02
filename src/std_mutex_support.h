@@ -346,17 +346,16 @@ class condition_variable {
     }
   }
 
-  static void wait_1(void* obj, std::unique_lock<mock::mutex>& lock) {
-    std::condition_variable* o = (std::condition_variable*)obj;
+  static void wait(void* obj, std::unique_lock<std::mutex>& lock) {
+    ::mock::condition_variable* o = (::mock::condition_variable*)obj;
     if (start_mock_print_mutex) {
-      printf("mock std::condition_variable::wait(...1) success!\n");
+      printf("mock std::condition_variable::wait(unique_lock<mutex>) success!\n");
     }
   }
-
-  static void wait_2(void* obj, std::unique_lock<std::mutex>& lock, std::function<bool()> p) {
-    std::condition_variable* o = (std::condition_variable*)obj;
+  static void wait_mutex_f(void* obj, std::unique_lock<std::mutex>& lock, std::function<bool()> p) {
+    ::mock::condition_variable* o = (::mock::condition_variable*)obj;
     if (start_mock_print_mutex) {
-      printf("mock std::condition_variable::wait(...2) success!\n");
+      printf("mock std::condition_variable::wait(unique_lock<mutex>, function) success!\n");
     }
   }
 
