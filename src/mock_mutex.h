@@ -205,7 +205,7 @@ class mock_condition_variable {
     stub_.set(
         (std::cv_status(std::condition_variable::*)(
             std::unique_lock<std::mutex>&,
-            const std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds>&))
+            const std::chrono::time_point<std::chrono::steady_clock>&))
             ADDR(std::condition_variable, wait_until),
         mock::condition_variable::wait_until_t2);
     stub_.set((bool(std::condition_variable::*)(

@@ -390,7 +390,7 @@ class condition_variable {
   static std::cv_status wait_until_t2(
       void* obj,
       std::unique_lock<std::mutex>&,
-      const std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds>&) {
+      const std::chrono::time_point<std::chrono::steady_clock>&) {
     ::mock::condition_variable* o = (::mock::condition_variable*)obj;
     if (start_mock_print_mutex) {
       printf("mock std::condition_variable::wait_until(...2) success!\n");
