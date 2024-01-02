@@ -151,7 +151,17 @@ TEST(t2_mutex, condition_variable) {
         auto timeout = std::chrono::steady_clock::now() + std::chrono::seconds(1);
         cv.wait_until(test_u_l, timeout);
       }
-      // t3
+      // t3: system_clock
+      {
+        std::function<bool()> check_function = []() {
+          std::cout << RED_COLOR << "Mock failed\n" << RESET_COLOR;
+          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+          return false;
+        };
+        auto timeout = std::chrono::system_clock::now() + std::chrono::seconds(5);
+        cv.wait_until(test_u_l, timeout, check_function);
+      }
+      // t3: steady_clock
       {
         std::function<bool()> check_function = []() {
           std::cout << RED_COLOR << "Mock failed\n" << RESET_COLOR;

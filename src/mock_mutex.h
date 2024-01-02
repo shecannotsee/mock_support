@@ -210,9 +210,14 @@ class mock_condition_variable {
         mock::condition_variable::wait_until_t2);
     stub_.set((bool(std::condition_variable::*)(
                   std::unique_lock<std::mutex>&,
-                  const std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds>&,
+                  const std::chrono::time_point<std::chrono::system_clock>&,
                   std::function<bool()>))ADDR(std::condition_variable, wait_until),
-              mock::condition_variable::wait_until_t3);
+              mock::condition_variable::wait_until_t3_system_clock);
+    stub_.set((bool(std::condition_variable::*)(
+              std::unique_lock<std::mutex>&,
+              const std::chrono::time_point<std::chrono::steady_clock>&,
+              std::function<bool()>))ADDR(std::condition_variable, wait_until),
+          mock::condition_variable::wait_until_t3_steady_clock);
     // wait_for
     // native_handle
     stub_.set(ADDR(std::condition_variable, native_handle), mock::condition_variable::native_handle);
