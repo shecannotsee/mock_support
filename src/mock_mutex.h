@@ -181,10 +181,26 @@ class mock_unique_lock {
   Stub stub_;
 };
 
-template <typename T1, typename T2>
+// The usage is as follows:
+//   mock_condition_variable mock_condition_variable_turn_on;
 class mock_condition_variable {
  public:
   mock_condition_variable() {
+    // notify_one
+    stub_.set(ADDR(std::condition_variable, notify_one), mock::condition_variable::notify_one);
+    // notify_all
+    stub_.set(ADDR(std::condition_variable, notify_all), mock::condition_variable::notify_all);
+    // wait
+    stub_.set((void(std::condition_variable::*)(std::unique_lock<std::mutex>&))ADDR(std::condition_variable, wait),
+              mock::condition_variable::wait);
+
+    stub_.set((void(std::condition_variable::*)(std::unique_lock<std::mutex>&, LambdaType))ADDR(
+                  std::condition_variable, wait),
+              mock::condition_variable::wait_mutex_f);
+    // wait_until
+    // wait_for
+    // native_handle
+    stub_.set(ADDR(std::condition_variable, native_handle), mock::condition_variable::native_handle);
   }
 
   ~mock_condition_variable() = default;
