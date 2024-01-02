@@ -33,14 +33,14 @@ TEST(t2_mutex, timed_mutex) {
   test_target.try_lock();
   // try_lock_for
   {
-    auto timeout = std::chrono::milliseconds(200);
+    const auto timeout = std::chrono::milliseconds(200);
     test_target.try_lock_for(timeout);
   }
   // try_lock_until
   {
-    auto now             = std::chrono::system_clock::now();
-    auto tenSecondsLater = now + std::chrono::seconds(10);
-    test_target.try_lock_until(tenSecondsLater);
+    const auto now     = std::chrono::system_clock::now();
+    const auto timeout = now + std::chrono::seconds(10);
+    test_target.try_lock_until(timeout);
   }
   test_target.unlock();
   test_target.native_handle();
@@ -59,7 +59,7 @@ TEST(t2_mutex, lock_guard) {
 }
 
 TEST(t2_mutex, unique_lock_with_mutex) {
-  mock_unique_lock<std::mutex, mock::mutex> mock_unique_lock_turn_on;
+  mock_unique_lock_with_mutex mock_unique_lock_with_mutex_turn_on;
   {
     std::mutex test_target;
     std::unique_lock<std::mutex> ul(test_target);
@@ -82,15 +82,24 @@ TEST(t2_mutex, unique_lock_with_mutex) {
 }
 
 TEST(t2_mutex, unique_lock_with_timed_mutex) {
-  SUCCEED();
-  return;
-  mock_unique_lock<std::timed_mutex, mock::timed_mutex> mock_unique_lock_turn_on;
+  mock_unique_lock_with_timed_mutex mock_unique_lock_with_timed_mutex_turn_on;
   {
     std::timed_mutex test_target;
     std::unique_lock<std::timed_mutex> ul(test_target);
     std::cout << BLUE_COLOR << "Member functions start!\n" << RESET_COLOR;
     ul.lock();
     ul.try_lock();
+    // try_lock_for
+    {
+      const auto timeout = std::chrono::milliseconds(200);
+      ul.try_lock_for(timeout);
+    }
+    // try_lock_until
+    {
+      const auto now     = std::chrono::system_clock::now();
+      const auto timeout = now + std::chrono::seconds(10);
+      ul.try_lock_until(timeout);
+    }
     ul.unlock();
     std::cout << PURPLE_COLOR << "Swap start!\n" << RESET_COLOR;
     {
@@ -99,6 +108,8 @@ TEST(t2_mutex, unique_lock_with_timed_mutex) {
     }
     std::cout << PURPLE_COLOR << "Swap done.\n" << RESET_COLOR;
     ul.release();
+    ul.owns_lock();
+    ul.mutex();
     std::cout << BLUE_COLOR << "Member functions done.\n" << RESET_COLOR;
   }
   SUCCEED();
