@@ -32,7 +32,7 @@ TEST(t2_mutex, lock_guard) {
   SUCCEED();
 }
 
-TEST(t2_mutex, unique_lock) {
+TEST(t2_mutex, unique_lock_with_mutex) {
   mock_unique_lock<std::mutex, mock::mutex> mock_unique_lock_turn_on;
   {
     std::mutex test_target;
@@ -56,5 +56,6 @@ TEST(t2_mutex, unique_lock) {
 }
 
 TEST(t2_mutex, condition_variable) {
+  SUCCEED();
   return;
 }
