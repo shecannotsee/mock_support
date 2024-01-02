@@ -117,5 +117,18 @@ TEST(t2_mutex, unique_lock_with_timed_mutex) {
 }
 
 TEST(t2_mutex, condition_variable) {
+  using mutex_type = std::mutex;
+  mock_condition_variable mock_condition_variable_turn_on;
+  std::condition_variable cv;
+  mutex_type test_mutex;
+  std::unique_lock<mutex_type> test_u_l(test_mutex);
+  {
+    std::cout << BLUE_COLOR << "Member functions start!\n" << RESET_COLOR;
+    cv.notify_one();
+    cv.notify_all();
+    cv.wait(test_u_l);
+    cv.native_handle();
+    std::cout << BLUE_COLOR << "Member functions done.\n" << RESET_COLOR;
+  }
   SUCCEED();
 }
