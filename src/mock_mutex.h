@@ -5,6 +5,8 @@
 #ifndef MOCK_MUTEX_H
 #define MOCK_MUTEX_H
 
+#include <mutex>
+
 #include "class_support.h"
 #include "cpp-stub/stub.h"
 #include "std_mutex_support.h"
@@ -29,18 +31,27 @@ class mock_mutex {
  private:
   Stub stub_;
 };
-
+// The usage is as follows:
+//   mock_timed_mutex mock_timed_mutex_turn_on;
 class mock_timed_mutex {
  public:
   mock_timed_mutex() {
     // lock
-    stub_.set(ADDR(std::mutex, lock), mock::mutex::lock);
-    // unlock
-    stub_.set(ADDR(std::mutex, unlock), mock::mutex::unlock);
+    stub_.set(ADDR(std::timed_mutex, lock), mock::timed_mutex::lock);
     // try_lock
-    stub_.set(ADDR(std::mutex, try_lock), mock::mutex::try_lock);
+    stub_.set(ADDR(std::timed_mutex, try_lock), mock::timed_mutex::try_lock);
+    // try_lock_for
+    stub_.set((bool(std::timed_mutex::*)(const std::chrono::milliseconds&))ADDR(std::timed_mutex, try_lock_for),
+              mock::timed_mutex::try_lock_for);
+    // try_lock_until
+    stub_.set(
+        (bool(std::timed_mutex::*)(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>&))
+            ADDR(std::timed_mutex, try_lock_until),
+        mock::timed_mutex::try_lock_until);
+    // unlock
+    stub_.set(ADDR(std::timed_mutex, unlock), mock::timed_mutex::unlock);
     // native_handle
-    stub_.set(ADDR(std::mutex, native_handle), mock::mutex::native_handle);
+    stub_.set(ADDR(std::timed_mutex, native_handle), mock::timed_mutex::native_handle);
   }
 
   ~mock_timed_mutex() = default;
@@ -77,33 +88,50 @@ template <typename std_mutex_type, typename mock_mutex_type>
 class mock_unique_lock {
  public:
   mock_unique_lock() {
-    // mock mutex
-    // lock
-    stub_.set(ADDR(std::mutex, lock), mock::mutex::lock);
-    // unlock
-    stub_.set(ADDR(std::mutex, unlock), mock::mutex::unlock);
-    // try_lock
-    stub_.set(ADDR(std::mutex, try_lock), mock::mutex::try_lock);
-    // native_handle
-    stub_.set(ADDR(std::mutex, native_handle), mock::mutex::native_handle);
+    // type check
+    if (std::is_same<std_mutex_type, std::mutex>::value || std::is_same<mock_mutex_type, mock::mutex>::value) {
+    } else if (std::is_same<std_mutex_type, std::timed_mutex>::value ||
+               std::is_same<mock_mutex_type, mock::timed_mutex>::value) {
+    } else {
+      static_assert(
+          (std::is_same<std_mutex_type, std::mutex>::value && std::is_same<mock_mutex_type, mock::mutex>::value) ||
+              (std::is_same<std_mutex_type, std::timed_mutex>::value &&
+               std::is_same<mock_mutex_type, mock::timed_mutex>::value),
+          "mock_unique_lock only accepts the following types "
+          "mock_unique_lock<std::mutex, mock::mutex> or "
+          "mock_unique_lock<std::timed_mutex, mock::timed_mutex>");
+    }
 
-    // unique_lock
-    // lock
-    stub_.set(ADDR(std::unique_lock<std::mutex>, lock), mock::unique_lock<std::mutex>::lock);
-    // try_lock
-    stub_.set(ADDR(std::unique_lock<std::mutex>, try_lock), mock::unique_lock<std::mutex>::try_lock);
-    // try_lock_until: Not supported, because std::mutex doesn't have a member function try_lock_until
-    // try_lock_for: Not supported, because std::mutex doesn't have a member function try_lock_for
-    // unlock
-    stub_.set(ADDR(std::unique_lock<std::mutex>, unlock), mock::unique_lock<std::mutex>::unlock);
-    // swap
-    stub_.set(ADDR(std::unique_lock<std::mutex>, swap), mock::unique_lock<std::mutex>::swap);
-    // release
-    stub_.set(ADDR(std::unique_lock<std::mutex>, release), mock::unique_lock<std::mutex>::release);
-    // owns_lock
-    stub_.set(ADDR(std::unique_lock<std::mutex>, owns_lock), mock::unique_lock<std::mutex>::owns_lock);
-    // mutex
-    stub_.set(ADDR(std::unique_lock<std::mutex>, mutex), mock::unique_lock<std::mutex>::mutex);
+    if (std::is_same<std_mutex_type, std::mutex>::value) {
+      // mock mutex
+      // lock
+      stub_.set(ADDR(std::mutex, lock), mock::mutex::lock);
+      // unlock
+      stub_.set(ADDR(std::mutex, unlock), mock::mutex::unlock);
+      // try_lock
+      stub_.set(ADDR(std::mutex, try_lock), mock::mutex::try_lock);
+      // native_handle
+      stub_.set(ADDR(std::mutex, native_handle), mock::mutex::native_handle);
+
+      // unique_lock
+      // lock
+      stub_.set(ADDR(std::unique_lock<std::mutex>, lock), mock::unique_lock<std::mutex>::lock);
+      // try_lock
+      stub_.set(ADDR(std::unique_lock<std::mutex>, try_lock), mock::unique_lock<std::mutex>::try_lock);
+      // try_lock_until: Not supported, because std::mutex doesn't have a member function try_lock_until
+      // try_lock_for: Not supported, because std::mutex doesn't have a member function try_lock_for
+      // unlock
+      stub_.set(ADDR(std::unique_lock<std::mutex>, unlock), mock::unique_lock<std::mutex>::unlock);
+      // swap
+      stub_.set(ADDR(std::unique_lock<std::mutex>, swap), mock::unique_lock<std::mutex>::swap);
+      // release
+      stub_.set(ADDR(std::unique_lock<std::mutex>, release), mock::unique_lock<std::mutex>::release);
+      // owns_lock
+      stub_.set(ADDR(std::unique_lock<std::mutex>, owns_lock), mock::unique_lock<std::mutex>::owns_lock);
+      // mutex
+      stub_.set(ADDR(std::unique_lock<std::mutex>, mutex), mock::unique_lock<std::mutex>::mutex);
+    } else if (std::is_same<std_mutex_type, std::timed_mutex>::value) {
+    }
   }
 
   ~mock_unique_lock() = default;
