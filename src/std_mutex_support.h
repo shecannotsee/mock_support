@@ -14,62 +14,6 @@ namespace mock {
 
 constexpr bool start_mock_print_mutex = true;
 
-class mutex_base {
- protected:
-  typedef struct __pthread_internal_list {
-    struct __pthread_internal_list* __prev;
-    struct __pthread_internal_list* __next;
-  } __pthread_list_t;
-  struct __pthread_mutex_s {
-    int __lock;
-    unsigned int __count;
-    int __owner;
-#ifdef __x86_64__
-    unsigned int __nusers;
-#endif
-    /* KIND must stay at this position in the structure to maintain
-       binary compatibility with static initializers.  */
-    int __kind;
-#ifdef __x86_64__
-    short __spins;
-    short __elision;
-    __pthread_list_t __list;
-#define __PTHREAD_MUTEX_HAVE_PREV 1
-#else
-    unsigned int __nusers;
-    __extension__ union {
-      struct {
-        short __espins;
-        short __eelision;
-#define __spins __elision_data.__espins
-#define __elision __elision_data.__eelision
-      } __elision_data;
-      __pthread_slist_t __list;
-    };
-#define __PTHREAD_MUTEX_HAVE_PREV 0
-#endif
-  };
-  typedef union {
-    struct __pthread_mutex_s __data;
-    char __size[40];
-    long int __align;
-  } pthread_mutex_t;
-  typedef pthread_mutex_t __gthread_mutex_t;
-  typedef __gthread_mutex_t __native_type;
-  typedef __native_type* native_handle_type;
-
-  __native_type _M_mutex;
-
-  mutex_base() noexcept {
-  }
-
-  ~mutex_base() noexcept {
-  }
-
-  mutex_base(const mutex_base&)            = delete;
-  mutex_base& operator=(const mutex_base&) = delete;
-};
-
 class mutex /* : private mutex_base */ {
  public:
   typedef struct pthread_internal_list {
@@ -155,35 +99,62 @@ class mutex /* : private mutex_base */ {
   }
 };  // class mutex
 
-template <typename mutex_type>
-class lock_guard {
- private:
-  struct adopt_lock_t {
-    explicit adopt_lock_t() = default;
-  };
-
+class timed_mutex {
  public:
-  explicit lock_guard(mutex_type& m) {
+  timed_mutex() {
     if (start_mock_print_mutex) {
-      printf("mock std::lock_guard::lock_guard(mutex_type& m) success!\n");
+      printf("mock std::timed_mutex::timed_mutex() success!\n");
+    }
+  }
+  ~timed_mutex() {
+    if (start_mock_print_mutex) {
+      printf("mock std::timed_mutex::~timed_mutex() success!\n");
     }
   }
 
-  lock_guard(mutex_type& m, adopt_lock_t) {
+  timed_mutex(const timed_mutex&)            = delete;
+  timed_mutex& operator=(const timed_mutex&) = delete;
+
+  static void lock() {
     if (start_mock_print_mutex) {
-      printf("mock std::lock_guard::lock_guard(mutex_type& m, adopt_lock_t) success!\n");
+      printf("mock std::timed_mutex::lock() success!\n");
     }
   }
 
-  ~lock_guard() {
+  static bool try_lock() {
     if (start_mock_print_mutex) {
-      printf("mock std::lock_guard::~lock_guard() success!\n");
+      printf("mock std::timed_mutex::try_lock()->bool success!\n");
+    }
+    return true;
+  }
+
+  static bool try_lock_until(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>&) {
+    if (start_mock_print_mutex) {
+      printf("mock std::timed_mutex::try_lock_until()->bool success!\n");
+    }
+    return true;
+  }
+
+  static bool try_lock_for(const std::chrono::duration<std::chrono::system_clock, std::chrono::nanoseconds>&) {
+    if (start_mock_print_mutex) {
+      printf("mock std::timed_mutex::try_lock_for()->bool success!\n");
+    }
+    return true;
+  }
+
+  static void unlock() {
+    if (start_mock_print_mutex) {
+      printf("mock std::timed_mutex::unlock() success!\n");
     }
   }
 
-  lock_guard(const lock_guard&)            = delete;
-  lock_guard& operator=(const lock_guard&) = delete;
-};  // class lock_guard
+  static ::mock::mutex::native_handle_type native_handle() noexcept {
+    if (start_mock_print_mutex) {
+      printf("mock std::timed_mutex::native_handle() success!\n");
+    }
+    return nullptr;
+  }
+};
 
 template <typename mutex_type>
 class unique_lock {
@@ -260,7 +231,7 @@ class unique_lock {
   unique_lock(const unique_lock&)            = delete;
   unique_lock& operator=(const unique_lock&) = delete;
 
-  unique_lock(unique_lock&& __u) noexcept : _M_device(__u._M_device), _M_owns(__u._M_owns) {
+  unique_lock(unique_lock&& __u) noexcept {
     if (start_mock_print_mutex) {
       printf("mock std::unique_lock::ctor::move success!\n");
     }
@@ -282,22 +253,6 @@ class unique_lock {
   static bool try_lock() {
     if (start_mock_print_mutex) {
       printf("mock std::unique_lock::try_lock success!\n");
-    }
-    return true;
-  }
-
-  template <typename _Clock, typename _Duration>
-  static bool try_lock_until(const std::chrono::time_point<_Clock, _Duration>& atime) {
-    if (start_mock_print_mutex) {
-      printf("mock std::unique_lock::try_lock_until(...) success!\n");
-    }
-    return true;
-  }
-
-  template <typename _Rep, typename _Period>
-  static bool try_lock_for(const std::chrono::duration<_Rep, _Period>& rtime) {
-    if (start_mock_print_mutex) {
-      printf("mock std::unique_lock::try_lock_for(...) success!\n");
     }
     return true;
   }
@@ -371,14 +326,15 @@ class condition_variable {
     }
   }
 
-  static void wait(std::unique_lock<std::mutex>& lock) {
+  static void wait_1(void* obj, std::unique_lock<mock::mutex>& lock) {
+    std::condition_variable* o = (std::condition_variable*)obj;
     if (start_mock_print_mutex) {
       printf("mock std::condition_variable::wait(...1) success!\n");
     }
   }
 
-  static void wait(void* obj, std::unique_lock<std::mutex>& lock, std::function<bool()> p) {
-    std::condition_variable* o= (std::condition_variable*)obj;
+  static void wait_2(void* obj, std::unique_lock<std::mutex>& lock, std::function<bool()> p) {
+    std::condition_variable* o = (std::condition_variable*)obj;
     if (start_mock_print_mutex) {
       printf("mock std::condition_variable::wait(...2) success!\n");
     }
