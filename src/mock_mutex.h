@@ -31,6 +31,7 @@ class mock_mutex {
  private:
   Stub stub_;
 };
+
 // The usage is as follows:
 //   mock_timed_mutex mock_timed_mutex_turn_on;
 class mock_timed_mutex {
