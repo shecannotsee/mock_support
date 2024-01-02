@@ -128,16 +128,18 @@ class timed_mutex {
     return true;
   }
 
-  static bool try_lock_until(const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>&) {
+  static bool try_lock_for(void* obj, const std::chrono::milliseconds&) {
+    timed_mutex* o= (timed_mutex*)obj;
     if (start_mock_print_mutex) {
-      printf("mock std::timed_mutex::try_lock_until()->bool success!\n");
+      printf("mock std::timed_mutex::try_lock_for()->bool success!\n");
     }
     return true;
   }
 
-  static bool try_lock_for(const std::chrono::duration<std::chrono::system_clock, std::chrono::nanoseconds>&) {
+  static bool try_lock_until(void* obj, const std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>&) {
+    timed_mutex* o= (timed_mutex*)obj;
     if (start_mock_print_mutex) {
-      printf("mock std::timed_mutex::try_lock_for()->bool success!\n");
+      printf("mock std::timed_mutex::try_lock_until()->bool success!\n");
     }
     return true;
   }
